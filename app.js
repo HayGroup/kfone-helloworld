@@ -1,5 +1,12 @@
 var express = require('express');
 var app = express();
+
+var pg = require("pg");
+
+var conString = "pg://kfmerge_admin:UateMistuTcH@usedpgsqlpayadb01.postgres.database.azure.com:5432/clientdataintake";
+var client = new pg.Client(conString);
+client.connect();
+
 app.get('/', function (req, res) {
   res.send('Hello World!');
 });

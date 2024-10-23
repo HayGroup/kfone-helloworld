@@ -17,6 +17,7 @@
   "homepage": "https://github.com/HayGroup/kfone-helloworld#readme",
   "description": "",
   "dependencies": {
-    "express": "^4.21.1"
+    "express": "^4.21.1",
+    "pg": "^8.13.0"
   }
 }
