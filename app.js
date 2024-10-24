@@ -1,21 +1,45 @@
-var express = require('express');
-var app = express();
 
-var pg = require("pg");
+const express = require('express');
+const { Client } = require('pg');
 
-var conString = "pg://kfmerge_admin:UateMistuTcH@usedpgsqlpayadb01.postgres.database.azure.com:5432/clientdataintake?sslmode=prefer";
-//var conString = 'pg://kfone_core_user:Ad%2FNJ1GGgtoH_@kfone-dev-use1-shared-psql-001.cnosksgsira5.us-east-1.rds.amazonaws.com:5432/kfone?schema=kfone_core?sslmode=prefer';
-var client = new pg.Client(conString);
-await client.connect();
+const app = express();
 
-const result = await client.query('SELECT NOW()')
-console.log(result)
- 
-await client.end()
+const conString = "pg://kfmerge_admin:UateMistuTcH@usedpgsqlpayadb01.postgres.database.azure.com:5432/clientdataintake?sslmode=strict";
 
-app.get('/', function (req, res) {
-  res.send('Hello World!');
+function connectToPostgres(conString) {
+    const client = new Client({
+        connectionString: conString,
+        ssl: {
+            rejectUnauthorized: false
+        }
+    });
+
+    client.connect(err => {
+        if (err) {
+            console.error('Connection error', err.stack);
+        } else {
+            console.log('Connected to the database');
+        }
+    });
+
+    return client;
+}
+
+app.get('/', async (req, res) => {
+    const client = connectToPostgres(conString);
+
+    try {
+        const result = await client.query('SELECT NOW()');
+        res.send(`Database time: ${result.rows[0].now}`);
+    } catch (err) {
+        console.error('Query error', err.stack);
+        res.status(500).send('Error querying the database');
+    } finally {
+        client.end();
+    }
 });
-app.listen(8080, function () {
-  console.log('Example app listening on port 8080!');
+
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });
